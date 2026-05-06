@@ -51,21 +51,32 @@ else:
         st.session_state.report_generated = False
         st.session_state.current_bazi = bazi_text
 
-    # --- 2. 初次观测（生成报告） ---
-    if st.button("✨ 开启量子观测"):
-        with st.spinner("正在链接量子场，进行全维演算..."):
-            try:
+    try:
+                # 首选主通道
                 response = client.models.generate_content(
                     model="gemini-2.5-flash", 
                     config={'system_instruction': master_knowledge},
                     contents=f"请基于八字：{bazi_text}，给出一份简明扼要的量子命理初步分析报告。"
                 )
-                # 将结果存入临时记忆
                 st.session_state.chat_history.append({"role": "ai", "content": response.text})
                 st.session_state.report_generated = True
-                st.rerun() # 刷新页面显示报告
+                st.rerun()
             except Exception as e:
-                st.error(f"通道拥挤，请稍后再试: {e}")
+                if "503" in str(e) or "429" in str(e):
+                    # 如果主通道堵车，自动走 Lite 辅路
+                    try:
+                        response = client.models.generate_content(
+                            model="gemini-2.5-flash-lite", 
+                            config={'system_instruction': master_knowledge},
+                            contents=f"请基于八字：{bazi_text}，给出一份简明扼要的量子命理初步分析报告。"
+                        )
+                        st.session_state.chat_history.append({"role": "ai", "content": response.text})
+                        st.session_state.report_generated = True
+                        st.rerun()
+                    except Exception as e_lite:
+                        st.error("🌌 目前全网量子算力均在满载状态，请稍候一两分钟再试。")
+                else:
+                    st.error(f"发生未知错误: {e}")
 
     # --- 3. 互动问答环节（仅在报告生成后显示） ---
     if st.session_state.report_generated:
@@ -94,7 +105,7 @@ else:
             with st.chat_message("assistant", avatar="🌌"):
                 with st.spinner("量子演算中..."):
                     try:
-                        # 构造包含完整上下文的请求
+                        # 1. 优先尝试主通道
                         context_prompt = f"用户的八字是 {bazi_text}。用户的问题是：{user_question}。请结合八字给出解答。"
                         answer = client.models.generate_content(
                             model="gemini-2.5-flash",
@@ -104,4 +115,17 @@ else:
                         st.write(answer.text)
                         st.session_state.chat_history.append({"role": "ai", "content": answer.text})
                     except Exception as e:
-                        st.error("通讯受阻，请稍后再问。")
+                        # 2. 如果主通道 503 或 429 报错，自动切换到 Lite 辅路
+                        if "503" in str(e) or "429" in str(e):
+                            try:
+                                answer = client.models.generate_content(
+                                    model="gemini-2.5-flash-lite", # 切换到更宽的通道
+                                    config={'system_instruction': master_knowledge},
+                                    contents=context_prompt
+                                )
+                                st.write(answer.text)
+                                st.session_state.chat_history.append({"role": "ai", "content": answer.text})
+                            except:
+                                st.error("🌌 目前量子场波动剧烈，请等待 60 秒后再提问。")
+                        else:
+                            st.error(f"通讯受阻，请稍后再问: {e}")
