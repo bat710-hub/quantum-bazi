@@ -1,6 +1,7 @@
 import streamlit as st
 from lunar_python import Solar
 from google import genai
+from datetime import date as dt_date # 引入日期处理逻辑
 
 # 1. 网页头部设计
 st.set_page_config(page_title="量子命理实验室", page_icon="🌌")
@@ -18,16 +19,24 @@ else:
     # 3. 用户输入生日信息
     col1, col2 = st.columns(2)
     with col1:
-        # 增加了一个 key 属性，确保数据被稳妥捕获
-        date = st.date_input("选择出生公历日期", value=None)
+        # --- 核心改动点：定义允许的时间范围 ---
+        min_d = dt_date(1900, 1, 1) # 最早支持到 1900 年
+        max_d = dt_date(2100, 12, 31) # 最晚支持到 2100 年
+        
+        date_input = st.date_input(
+            "选择出生公历日期", 
+            value=None, 
+            min_value=min_d, 
+            max_value=max_d
+        )
     with col2:
         time_hour = st.number_input("出生小时 (0-23)", min_value=0, max_value=23, value=12)
 
-    # --- 关键改动点：增加一个判断逻辑 ---
-    if date is not None:
+    # 4. 判断逻辑
+    if date_input is not None:
         try:
-            # 只有当用户选了日期，才执行计算逻辑
-            solar = Solar.fromYmdHms(date.year, date.month, date.day, time_hour, 0, 0)
+            # 执行排盘计算
+            solar = Solar.fromYmdHms(date_input.year, date_input.month, date_input.day, time_hour, 0, 0)
             lunar = solar.getLunar()
             eight_char = lunar.getEightChar()
             bazi_text = f"{eight_char.getYear()} {eight_char.getMonth()} {eight_char.getDay()} {eight_char.getTime()}"
@@ -51,7 +60,7 @@ else:
         except Exception as e:
             st.error(f"计算出错，请检查输入：{e}")
     else:
-        st.info("💡 请先在上方选择您的出生日期。")
+        st.info("💡 请先在上方选择您的出生日期（支持 1900 年至今）。")
 
 st.markdown("---")
 st.caption("基于量子概率理论与传统干支逻辑建模")
