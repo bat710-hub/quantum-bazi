@@ -58,7 +58,10 @@ else:
                     st.markdown("### 🌀 观测报告")
                     st.write(response.text)
         except Exception as e:
-            st.error(f"计算出错，请检查输入：{e}")
+            if "429" in str(e):
+                st.error("🌌 量子场目前过于拥挤（API 频率限制），请等待 1 分钟后再试。")
+            else:
+                st.error(f"计算出错，请检查输入：{e}")
     else:
         st.info("💡 请先在上方选择您的出生日期（支持 1900 年至今）。")
 
