@@ -3,118 +3,119 @@ from lunar_python import Solar
 from google import genai
 from datetime import date as dt_date
 
-# --- 页面配置与隐私声明 ---
-st.set_page_config(page_title="量子命理实验室", page_icon="🌌")
-st.title("🌌 量子八字命理推演")
-st.caption("🔒 隐私承诺：本系统采用纯量子无痕演算，您的任何输入信息将在关闭页面后彻底湮灭。")
-st.markdown("---")
+# --- 1. 页面配置与视觉样式 ---
+st.set_page_config(page_title="量子命理实验室", page_icon="🌌", layout="wide")
+st.title("🌌 量子八字命理推演系统")
+st.caption("🔒 隐私承诺：采用纯量子无痕演算，所有输入信息在关闭页面后自动湮灭。")
 
+# --- 2. 后台连接配置 ---
 api_key = st.secrets.get("GEMINI_API_KEY")
 
 if not api_key:
-    st.error("请在后台配置 API Key")
+    st.error("❌ 请在 Streamlit 后台配置您的 GEMINI_API_KEY")
 else:
     client = genai.Client(api_key=api_key)
+
+    # --- 3. 侧边栏：实验室参数 (增加专业仪式感) ---
+    with st.sidebar:
+        st.header("⚙️ 观测参数")
+        st.slider("量子纠缠强度", 0.0, 1.0, 0.85)
+        st.selectbox("分析深度", ["全维演算", "因果溯源", "快速扫描"])
+        st.divider()
+        if st.button("🧹 湮灭观测记录"):
+            st.session_state.chat_history = []
+            st.session_state.report_generated = False
+            st.rerun()
+
+    # --- 4. 用户输入区域 (新增：性别、出生地) ---
+    with st.container():
+        st.subheader("📡 时空坐标输入")
+        col1, col2 = st.columns(2)
+        with col1:
+            date_input = st.date_input("出生日期", value=dt_date(1995, 1, 1), min_value=dt_date(1900, 1, 1))
+        with col2:
+            time_hour = st.number_input("出生小时 (0-23)", 0, 23, 12)
+
+        col3, col4 = st.columns(2)
+        with col3:
+            gender = st.selectbox("性别", ["男", "女"])
+        with col4:
+            location = st.text_input("出生城市", placeholder="例如：曼谷")
+
+    # --- 5. 八字计算核心 ---
+    solar = Solar.fromYmdHms(date_input.year, date_input.month, date_input.day, time_hour, 0, 0)
+    bazi_obj = solar.getLunar().getEightChar()
+    bazi_text = f"{bazi_obj.getYear()} {bazi_obj.getMonth()} {bazi_obj.getDay()} {bazi_obj.getTime()}"
+    gender_tag = "乾造" if gender == "男" else "坤造"
     
-    # --- 1. 底层资料库 ---
-    master_knowledge = """
-    你是一个精通传统八字（如《三命通会》、《滴天髓》）与现代量子力学的专家。
-    分析时请结合量子概率、观测者效应等概念。语言要有神秘感且客观，严禁迷信，强调主观能动性。
+    st.info(f"🧬 **能量场锁定**：{gender_tag} | {bazi_text} | 观测坐标：{location if location else '全球叠加态'}")
+
+    # --- 6. 五行能量场可视化 (新增功能) ---
+    wuxing_counts = {
+        "木": bazi_text.count("甲")+bazi_text.count("乙")+bazi_text.count("寅")+bazi_text.count("卯"),
+        "火": bazi_text.count("丙")+bazi_text.count("丁")+bazi_text.count("巳")+bazi_text.count("午"),
+        "土": bazi_text.count("戊")+bazi_text.count("己")+bazi_text.count("辰")+bazi_text.count("戌")+bazi_text.count("丑")+bazi_text.count("未"),
+        "金": bazi_text.count("庚")+bazi_text.count("辛")+bazi_text.count("申")+bazi_text.count("酉"),
+        "水": bazi_text.count("壬")+bazi_text.count("癸")+bazi_text.count("亥")+bazi_text.count("子"),
+    }
+    v_cols = st.columns(5)
+    labels = list(wuxing_counts.keys())
+    for i, col in enumerate(v_cols):
+        col.metric(labels[i], f"{wuxing_counts[labels[i]]} 阶")
+
+    # --- 7. 系统知识库配置 ---
+    master_knowledge = f"""
+    你是一个精通传统八字（《渊海子平》、《滴天髓》）与现代量子力学的专家。
+    当前观测对象：{gender_tag}（性别影响大运顺逆，请严格遵循）。
+    观测地点：{location}。
+    分析要求：请结合干支生克与波函数坍缩理论，提供具有科学感且神秘精准的命理报告。
     """
 
-    col1, col2 = st.columns(2)
-    with col1:
-        date_input = st.date_input("出生日期", value=dt_date(1995, 1, 1), min_value=dt_date(1900, 1, 1))
-    with col2:
-        time_hour = st.number_input("小时 (0-23)", 0, 23, 12)
-
-    solar = Solar.fromYmdHms(date_input.year, date_input.month, date_input.day, time_hour, 0, 0)
-    bazi = solar.getLunar().getEightChar()
-    bazi_text = f"{bazi.getYear()} {bazi.getMonth()} {bazi.getDay()} {bazi.getTime()}"
-    
-    st.info(f"🧬 原始能量场锁定：{bazi_text}")
-
-    # --- 初始化 Session State ---
+    # 初始化记忆
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
     if "report_generated" not in st.session_state:
         st.session_state.report_generated = False
-    if "current_bazi" not in st.session_state:
-        st.session_state.current_bazi = bazi_text
 
-    # 如果换了八字，清空历史
-    if st.session_state.current_bazi != bazi_text:
-        st.session_state.chat_history = []
-        st.session_state.report_generated = False
-        st.session_state.current_bazi = bazi_text
-
-    # --- 2. 初次观测（带自动切换通道） ---
-    if st.button("✨ 开启量子观测"):
-        with st.spinner("正在链接量子场..."):
+    # --- 8. 观测执行按钮 ---
+    if st.button("✨ 开启全维观测"):
+        with st.spinner("量子信道链接中，正在坍缩概率云..."):
             try:
-                # 优先尝试 2.5 Flash
+                # 优先尝试 Flash 通道
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash", 
+                    model="gemini-2.5-flash",
                     config={'system_instruction': master_knowledge},
-                    contents=f"请基于八字：{bazi_text}，给出一份简明扼要的分析报告。"
+                    contents=f"基于八字：{bazi_text}，生成初步观测报告。"
                 )
                 st.session_state.chat_history.append({"role": "ai", "content": response.text})
                 st.session_state.report_generated = True
                 st.rerun()
             except Exception as e:
-                # 如果主通道报错，尝试 Lite 通道
-                try:
-                    response = client.models.generate_content(
-                        model="gemini-2.5-flash-lite", 
-                        config={'system_instruction': master_knowledge},
-                        contents=f"请基于八字：{bazi_text}，给出一份简明扼要的分析报告。"
-                    )
-                    st.session_state.chat_history.append({"role": "ai", "content": response.text})
-                    st.session_state.report_generated = True
-                    st.rerun()
-                except Exception as e_lite:
-                    st.error(f"量子通道拥挤，请一分钟后再试。错误码: {e_lite}")
+                st.error(f"⚠️ 量子信道波动: {e}")
 
-    # --- 3. 互动问答环节 ---
+    # --- 9. 互动问答区域 ---
     if st.session_state.report_generated:
-        st.markdown("### 🌀 观测报告与互动")
-        
+        st.markdown("---")
+        st.subheader("🌀 观测报告与追问")
         for msg in st.session_state.chat_history:
-            role_icon = "👤" if msg["role"] == "user" else "🌌"
-            with st.chat_message(msg["role"], avatar=role_icon):
+            with st.chat_message(msg["role"], avatar="🌌" if msg["role"]=="ai" else "👤"):
                 st.write(msg["content"])
 
-        user_question = st.chat_input("追问细节（如：事业、财运、观测建议）")
-        
-        if user_question:
-            with st.chat_message("user", avatar="👤"):
-                st.write(user_question)
-            
-            st.session_state.chat_history.append({"role": "user", "content": user_question})
-            
+        user_q = st.chat_input("向实验室追问细节...")
+        if user_q:
+            st.session_state.chat_history.append({"role": "user", "content": user_q})
             with st.chat_message("assistant", avatar="🌌"):
-                with st.spinner("量子演算中..."):
-                    context_prompt = f"八字：{bazi_text}。问题：{user_question}"
+                with st.spinner("演算中..."):
                     try:
-                        answer = client.models.generate_content(
+                        ans = client.models.generate_content(
                             model="gemini-2.5-flash",
                             config={'system_instruction': master_knowledge},
-                            contents=context_prompt
+                            contents=f"背景：{bazi_text}。问题：{user_q}"
                         )
-                        st.write(answer.text)
-                        st.session_state.chat_history.append({"role": "ai", "content": answer.text})
-                    except Exception as e:
-                        try:
-                            # 追问时也使用备用通道
-                            answer = client.models.generate_content(
-                                model="gemini-2.5-flash-lite",
-                                config={'system_instruction': master_knowledge},
-                                contents=context_prompt
-                            )
-                            st.write(answer.text)
-                            st.session_state.chat_history.append({"role": "ai", "content": answer.text})
-                        except:
-                            st.error("通讯受阻，当前算力不足，请稍后刷新页面。")
+                        st.write(ans.text)
+                        st.session_state.chat_history.append({"role": "ai", "content": ans.text})
+                    except:
+                        st.error("由于请求频繁，量子场暂不稳定，请稍后。")
 
 st.markdown("---")
-st.caption("注：本工具仅供学习参考。")
+st.caption("实验说明：本系统基于开源算法与 AI 推演，观测结果仅供参考。")
