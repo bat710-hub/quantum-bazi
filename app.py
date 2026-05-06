@@ -50,15 +50,26 @@ else:
                     user_prompt = f"用户的八字是：{bazi_text}。请进行量子命理分析。"
                     
                     try:
+                        # 方案 A: 使用目前最新的 2.5 Flash 稳定版
                         response = client.models.generate_content(
-                            model="gemini-1.5-flash-002", 
+                            model="gemini-2.5-flash", 
                             config={'system_instruction': system_prompt},
                             contents=user_prompt
                         )
-                        st.markdown("### 🌀 观测报告")
+                        st.markdown("### 🌀 观测报告 (v2.5)")
                         st.write(response.text)
                     except Exception as ai_err:
-                        st.error(f"接口报错：{ai_err}")
+                        try:
+                            # 方案 B: 如果上面还是拥挤报错，退回 2.5 极速轻量版
+                            response = client.models.generate_content(
+                                model="gemini-2.5-flash-lite", 
+                                config={'system_instruction': system_prompt},
+                                contents=user_prompt
+                            )
+                            st.markdown("### 🌀 观测报告 (v2.5 Lite)")
+                            st.write(response.text)
+                        except Exception as e:
+                            st.error(f"接口报错：{e}")
         except Exception as e:
             if "429" in str(e):
                 st.error("🌌 量子场目前过于拥挤（API 频率限制），请等待 1 分钟后再试。")
