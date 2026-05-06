@@ -61,10 +61,10 @@ else:
                     except Exception as ai_err:
                         # 如果 1.5 报错，自动退回到 2.0 尝试
                         response = client.models.generate_content(
-                            model="gemini-2.0-flash",
-                            config={'system_instruction': system_prompt},
-                            contents=user_prompt
-                        )
+                model="gemini-2.0-flash", # 如果依然报 404，请尝试改为 "gemini-1.5-flash"
+                config={'system_instruction': system_prompt},
+                contents=user_prompt
+            )
                         st.markdown("### 🌀 观测报告 (v2.0)")
                         st.write(response.text)
         except Exception as e:
