@@ -49,14 +49,24 @@ else:
                     system_prompt = "你是一个精通量子力学和传统八字的专家。请用专业且神秘的语气，将用户的八字视为能量场，分析其概率叠加态。禁止奉承，只要最客观的结果。"
                     user_prompt = f"用户的八字是：{bazi_text}。请进行量子命理分析。"
                     
-                    response = client.models.generate_content(
-                        model="models/gemini-1.5-flash",
-                        config={'system_instruction': system_prompt},
-                        contents=user_prompt
-                    )
-                    
-                    st.markdown("### 🌀 观测报告")
-                    st.write(response.text)
+                    try:
+                        # 尝试使用最标准的 1.5 Flash 命名
+                        response = client.models.generate_content(
+                            model="gemini-1.5-flash", 
+                            config={'system_instruction': system_prompt},
+                            contents=user_prompt
+                        )
+                        st.markdown("### 🌀 观测报告")
+                        st.write(response.text)
+                    except Exception as ai_err:
+                        # 如果 1.5 报错，自动退回到 2.0 尝试
+                        response = client.models.generate_content(
+                            model="gemini-2.0-flash",
+                            config={'system_instruction': system_prompt},
+                            contents=user_prompt
+                        )
+                        st.markdown("### 🌀 观测报告 (v2.0)")
+                        st.write(response.text)
         except Exception as e:
             if "429" in str(e):
                 st.error("🌌 量子场目前过于拥挤（API 频率限制），请等待 1 分钟后再试。")
