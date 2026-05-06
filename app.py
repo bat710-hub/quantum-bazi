@@ -18,33 +18,40 @@ else:
     # 3. 用户输入生日信息
     col1, col2 = st.columns(2)
     with col1:
-        date = st.date_input("出生公历日期")
+        # 增加了一个 key 属性，确保数据被稳妥捕获
+        date = st.date_input("选择出生公历日期", value=None)
     with col2:
         time_hour = st.number_input("出生小时 (0-23)", min_value=0, max_value=23, value=12)
 
-    # 4. 准确排盘 (使用 lunar-python 库)
-    solar = Solar.fromYmdHms(date.year, date.month, date.day, time_hour, 0, 0)
-    lunar = solar.getLunar()
-    eight_char = lunar.getEightChar()
-    bazi_text = f"{eight_char.getYear()} {eight_char.getMonth()} {eight_char.getDay()} {eight_char.getTime()}"
+    # --- 关键改动点：增加一个判断逻辑 ---
+    if date is not None:
+        try:
+            # 只有当用户选了日期，才执行计算逻辑
+            solar = Solar.fromYmdHms(date.year, date.month, date.day, time_hour, 0, 0)
+            lunar = solar.getLunar()
+            eight_char = lunar.getEightChar()
+            bazi_text = f"{eight_char.getYear()} {eight_char.getMonth()} {eight_char.getDay()} {eight_char.getTime()}"
 
-    st.success(f"🎴 已锁定能量场（八字）：{bazi_text}")
+            st.success(f"🎴 已锁定能量场（八字）：{bazi_text}")
 
-    # 5. 调用 Gemini 进行量子推演
-    if st.button("💫 开始量子观测"):
-        with st.spinner("波函数坍缩中..."):
-            # 这里就是你调教 AI 的“系统指令”
-            system_prompt = "你是一个精通量子力学和传统八字的专家。请用专业且神秘的语气，将用户的八字视为能量场，分析其概率叠加态。禁止奉承，只要最客观的结果。"
-            user_prompt = f"用户的八字是：{bazi_text}。请进行量子命理分析。"
-            
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                config={'system_instruction': system_prompt},
-                contents=user_prompt
-            )
-            
-            st.markdown("### 🌀 观测报告")
-            st.write(response.text)
+            # 调用 Gemini 进行量子推演
+            if st.button("💫 开始量子观测"):
+                with st.spinner("波函数坍缩中..."):
+                    system_prompt = "你是一个精通量子力学和传统八字的专家。请用专业且神秘的语气，将用户的八字视为能量场，分析其概率叠加态。禁止奉承，只要最客观的结果。"
+                    user_prompt = f"用户的八字是：{bazi_text}。请进行量子命理分析。"
+                    
+                    response = client.models.generate_content(
+                        model="gemini-2.0-flash",
+                        config={'system_instruction': system_prompt},
+                        contents=user_prompt
+                    )
+                    
+                    st.markdown("### 🌀 观测报告")
+                    st.write(response.text)
+        except Exception as e:
+            st.error(f"计算出错，请检查输入：{e}")
+    else:
+        st.info("💡 请先在上方选择您的出生日期。")
 
 st.markdown("---")
 st.caption("基于量子概率理论与传统干支逻辑建模")
