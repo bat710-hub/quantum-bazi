@@ -40,8 +40,7 @@ else:
     with st.sidebar:
         st.header("⚙️ 实验室info")
         st.success("内核：Gemini 2.5 Flash")
-        st.write("已校准太阳真时
-                 （视太阳时）")
+        st.write("已校准太阳真时")
         
         st.divider()
         
