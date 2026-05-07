@@ -161,16 +161,16 @@ else:
     if st.button("✨ 开启全维路径演算"):
         with st.spinner("系统正在调动高维算力..."):
             try:
-                # 增加了安全设置，防止因为敏感词导致返回 None
+                # 更改后的调用逻辑，修正了 category 的命名规范
                 response = client.models.generate_content(
                     model="gemini-2.5-flash",
                     config={
                         'system_instruction': master_knowledge,
                         'safety_settings': [
-                            {"category": "HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                            {"category": "HARASSMENT", "threshold": "BLOCK_NONE"},
-                            {"category": "SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-                            {"category": "DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+                            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+                            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
                         ]
                     },
                     contents=f"基于八字：{bazi_text}，提交全维演算报告。"
