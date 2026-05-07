@@ -47,12 +47,12 @@ else:
         # --- 优化后的提示词 ---
         st.markdown("""
         <div style="font-size: 0.75rem; color: #808495; line-height: 1.5; border-left: 2px solid #ff4b4b; padding-left: 10px;">
-            <strong style="color: #ff4b4b;">🧪 观测边界说明 (Disclaimer)</strong><br><br>
-        st.caption("""
-        1. **概率本质**：本系统基于量子路径积分模拟，所有推演结果均为“波函数坍缩”的概率分支描述，不构成任何确定性定论。
-        2. **非决策依据**：演算报告仅供逻辑研究与娱乐观赏。
-        3. **观测者效应**：请保持客观理性的观测姿态。生命系统具有高度的非局域性与主观能动性，任何既定概率均可通过个体意识的干预而改变。
-        """)
+            <strong style="color: #ff4b4b;">🧪 边界说明 (Disclaimer)</strong><br><br>
+            <b>1. 概率本质</b>：本系统基于量子路径积分模拟，所有推演结果均为“波函数坍缩”的概率分支描述，不构成任何确定性定论。<br><br>
+            <b>2. 非决策依据</b>：演算报告仅供逻辑研究与娱乐观赏，严禁作为任何决策的直接依据。<br><br>
+            <b>3. 观测者效应</b>：请保持客观理性的观测姿态。生命系统具有高度的非局域性与主观能动性，任何既定概率均可通过个体意识的干预而改变。
+        </div>
+        """, unsafe_allow_html=True)
         
         st.divider()
         
