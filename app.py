@@ -41,7 +41,7 @@ else:
         st.header("⚙️ 演算参数")
         st.success("内核：Gemini 2.5 Flash (Paid)")
         st.info("校准标准：真太阳时 (视太阳时)")
-        if st.button("🧹 抹除观测痕迹"):
+        if st.button("🧹 清除观测痕迹"):
             st.session_state.chat_history = []
             st.session_state.report_generated = False
             st.rerun()
@@ -124,7 +124,7 @@ else:
 
     # --- 10. 执行按钮 ---
     if st.button("✨ 开启全维路径演算"):
-        with st.spinner("量子信道高优先级连接中..."):
+        with st.spinner("信道连接中..."):
             try:
                 response = client.models.generate_content(
                     model="gemini-2.5-flash", 
