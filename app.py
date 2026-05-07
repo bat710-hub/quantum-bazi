@@ -144,18 +144,33 @@ else:
 
     # --- 10. 执行按钮 ---
     if st.button("✨ 开启全维路径演算"):
-        with st.spinner("信道连接中..."):
+        with st.spinner("系统正在调动高维算力..."):
             try:
+                # 增加了安全设置，防止因为敏感词导致返回 None
                 response = client.models.generate_content(
-                    model="gemini-2.5-flash", 
-                    config={'system_instruction': master_knowledge},
+                    model="gemini-2.5-flash",
+                    config={
+                        'system_instruction': master_knowledge,
+                        'safety_settings': [
+                            {"category": "HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                            {"category": "HARASSMENT", "threshold": "BLOCK_NONE"},
+                            {"category": "SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
+                            {"category": "DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"}
+                        ]
+                    },
                     contents=f"基于八字：{bazi_text}，提交全维演算报告。"
                 )
-                st.session_state.chat_history.append({"role": "ai", "content": response.text})
-                st.session_state.report_generated = True
-                st.rerun()
+                
+                # 核心检查：如果 response 没有 text，说明被拦截或出错了
+                if response and hasattr(response, 'text') and response.text:
+                    st.session_state.chat_history.append({"role": "ai", "content": response.text})
+                    st.session_state.report_generated = True
+                    st.rerun()
+                else:
+                    st.error("🌀 量子场观测结果为空（可能是触发了安全过滤或逻辑中断），请稍后再点一次。")
+                    
             except Exception as e:
-                st.error(f"演算中断: {e}")
+                st.error(f"⚠️ 演算中断（服务器波动）: {e}")
 
     # --- 11. 互动对话 ---
     if st.session_state.report_generated:
