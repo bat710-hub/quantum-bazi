@@ -38,9 +38,22 @@ else:
 
     # --- 4. 侧边栏 ---
     with st.sidebar:
-        st.header("⚙️ 演算参数")
-        st.success("内核：Gemini 2.5 Flash ")
-        st.info("校准标准：真太阳时 (视太阳时)")
+        st.header("⚙️ 实验室info")
+        st.success("内核：Gemini 2.5 Flash")
+        st.write("校准太阳真时（视太阳时）")
+        
+        st.divider()
+        
+        # --- 优化后的娱乐提示词 ---
+        st.warning("🧪 **边界说明 (Disclaimer)**")
+        st.caption("""
+        1. **概率本质**：本系统基于量子路径积分模拟，所有推演结果均为“波函数坍缩”的概率分支描述，不构成任何确定性定论。
+        2. **非决策依据**：演算报告仅供逻辑研究与娱乐观赏。
+        3. **观测者效应**：请保持客观理性的观测姿态。生命系统具有高度的非局域性与主观能动性，任何既定概率均可通过个体意识的干预而改变。
+        """)
+        
+        st.divider()
+        
         if st.button("🧹 清除观测痕迹"):
             st.session_state.chat_history = []
             st.session_state.report_generated = False
