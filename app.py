@@ -57,7 +57,7 @@ else:
         with col3:
             gender = st.selectbox("性别", ["男", "女"])
 
-        birth_place = st.text_input("出生城市 (自动校准)", placeholder="例如：曼谷, 北京, 成都")
+        birth_place = st.text_input("出生城市 (自动校准)", placeholder="请精确到区、县、镇 例如：北京朝阳区, 广东东莞虎门镇")
 
     # --- 6. 自动化时空校准逻辑 ---
     final_lng = 120.0
