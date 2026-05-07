@@ -39,7 +39,7 @@ else:
     # --- 4. 侧边栏 ---
     with st.sidebar:
         st.header("⚙️ 演算参数")
-        st.success("内核：Gemini 2.5 Flash (Paid)")
+        st.success("内核：Gemini 2.5 Flash ")
         st.info("校准标准：真太阳时 (视太阳时)")
         if st.button("🧹 清除观测痕迹"):
             st.session_state.chat_history = []
