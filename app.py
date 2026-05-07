@@ -44,8 +44,8 @@ else:
         
         st.divider()
         
-        # --- 优化后的娱乐提示词 ---
-        st.warning("🧪 **边界说明 (Disclaimer)**")
+        # --- 优化后的提示词 ---
+        st.<strong style="color: #ff4b4b;">🧪 边界说明 (Disclaimer)</strong><br><br>
         st.caption("""
         1. **概率本质**：本系统基于量子路径积分模拟，所有推演结果均为“波函数坍缩”的概率分支描述，不构成任何确定性定论。
         2. **非决策依据**：演算报告仅供逻辑研究与娱乐观赏。
