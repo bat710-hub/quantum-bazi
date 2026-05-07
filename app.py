@@ -8,7 +8,7 @@ import math
 # --- 1. 页面配置 ---
 st.set_page_config(page_title="量子命理实验室 PRO", page_icon="🌌", layout="wide")
 st.title("🌌 量子命理：全维自动校准系统")
-st.caption("🚀 PRO v4.5 | 自动地理定位 | 真太阳时精密校正 | 旗舰算力")
+st.caption("🚀 PRO v5.0 | 自动地理定位 | 真太阳时精密校正 | 旗舰算力")
 
 # --- 2. 后台配置 ---
 api_key = st.secrets.get("GEMINI_API_KEY")
@@ -98,7 +98,7 @@ else:
     bazi_text = f"{bazi_obj.getYear()} {bazi_obj.getMonth()} {bazi_obj.getDay()} {bazi_obj.getTime()}"
     gender_tag = "乾造" if gender == "男" else "坤造"
     
-    st.warning(f"🕒 **时空校准激活**：原始 {time_input} → **真太阳时 {true_solar_dt.strftime('%H:%M')}** (偏差: {total_offset:.1f}分)")
+    st.warning(f"🕒 **校准激活**：原始 {time_input} → **真太阳时 {true_solar_dt.strftime('%H:%M')}** (偏差: {total_offset:.1f}分)")
     st.info(f"🧬 **最终场锁定**：{gender_tag} | {bazi_text}")
 
     # --- 8. 五行能量可视化 ---
@@ -159,7 +159,7 @@ else:
 
     # --- 10. 执行按钮 ---
     if st.button("✨ 开启全维路径演算"):
-        with st.spinner("系统正在调动高维算力..."):
+        with st.spinner("系统正在调动算力..."):
             try:
                 # 更改后的调用逻辑，修正了 category 的命名规范
                 response = client.models.generate_content(
